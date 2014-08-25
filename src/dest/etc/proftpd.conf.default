@@ -1,0 +1,67 @@
+ServerName              "Drobo ProFTPD"
+ServerType              standalone
+DefaultServer           on
+Port                    21
+UseIPv6                 off
+Umask                   022
+MaxInstances            5
+User                    root
+Group                   root
+DefaultRoot             /mnt/DroboFS/Shares/
+AllowOverwrite          on
+<Limit SITE_CHMOD>
+  DenyAll
+</Limit>
+
+RootLogin               off
+RequireValidShell       off
+SQLDefaultUID           99
+SQLDefaultGID           99
+SQLMinUserUID           999
+SQLMinUserGID           999
+AuthOrder               mod_sql.c mod_auth_unix.c
+DisplayLogin            welcome.msg
+DisplayChdir            .message
+AllowStoreRestart       on
+PidFile                 /tmp/DroboApps/proftpd/pid.txt
+SystemLog               /tmp/DroboApps/proftpd/log.txt
+ExtendedLog             /tmp/DroboApps/proftpd/auth.log AUTH
+#SQLLogFile              /tmp/DroboApps/proftpd/sql.log
+WtmpLog                 off
+
+SQLBackend              sqlite3
+SQLEngine               on
+SQLAuthenticate         on
+SQLConnectInfo          /mnt/DroboFS/Shares/DroboApps/proftpd/var/auth.sqlite3
+SQLUserInfo             users userid passwd uid gid homedir shell
+SQLGroupInfo            groups groupname gid members
+SQLUserWhereClause      "disabled != 1"
+SQLLog PASS             updatecount
+SQLNamedQuery           updatecount UPDATE "login_count=login_count+1, last_login=datetime() WHERE userid='%u'" users
+
+SQLPasswordEngine       on
+SQLPasswordPBKDF2       sha1 5000 20
+SQLPasswordUserSalt     name Prepend
+SQLAuthTypes            pbkdf2
+SQLPasswordEncoding     hex
+
+# Used to track xfer traffic per user (without invoking a quota)
+SQLLog RETR             bytes-out-count
+SQLNamedQuery           bytes-out-count UPDATE "bytes_out_used=bytes_out_used+%b WHERE userid='%u'" users
+SQLLog RETR             files-out-count
+SQLNamedQuery           files-out-count UPDATE "files_out_used=files_out_used+1 WHERE userid='%u'" users
+
+SQLLog STOR             bytes-in-count
+SQLNamedQuery           bytes-in-count UPDATE "bytes_in_used=bytes_in_used+%b WHERE userid='%u'" users
+SQLLog STOR             files-in-count
+SQLNamedQuery           files-in-count UPDATE "files_in_used=files_in_used+1 WHERE userid='%u'" users
+
+<IfModule mod_tls.c>
+  TLSEngine             on
+  TLSLog                /tmp/DroboApps/proftpd/tls.log
+  TLSProtocol           TLSv1
+  TLSRequired           off
+  TLSRSACertificateFile /mnt/DroboFS/Shares/DroboApps/proftpd/etc/server.crt
+  TLSRSACertificateKeyFile /mnt/DroboFS/Shares/DroboApps/proftpd/etc/server.key
+  TLSVerifyClient       off
+</IfModule>
