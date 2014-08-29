@@ -20,11 +20,12 @@ exec 1> >(tee -a "${logfile}")
 exec 2> >(tee -a "${logfile}" >&2)
 
 ### environment variables ###
-. bin/crosscompile.drobo5n.sh
-export DEST="/mnt/DroboFS/Shares/DroboApps/proftpd"
-export DEPS="/mnt/DroboFS/Shares/DroboApps/proftpddeps"
-export CFLAGS="${CFLAGS} -Os -fPIC"
-export CXXFLAGS="${CXXFLAGS} ${CFLAGS}"
+. crosscompile.sh
+export NAME="openssh"
+export DEST="/mnt/DroboFS/Shares/DroboApps/${NAME}"
+export DEPS="/mnt/DroboFS/Shares/DroboApps/${NAME}deps"
+export CFLAGS="${CFLAGS:-} -Os -fPIC"
+export CXXFLAGS="${CXXFLAGS:-} ${CFLAGS}"
 export CPPFLAGS="-I${DEPS}/include"
 export LDFLAGS="${LDFLAGS:-} -Wl,-rpath,${DEST}/lib -L${DEST}/lib"
 alias make="make -j8  V=1 VERBOSE=1"
@@ -110,7 +111,7 @@ _download_tgz "${MYSQL_FILE}" "${MYSQL_URL}" "${MYSQL_FOLDER}"
 [[ ! -d target/"${MYSQL_FOLDER_HOST}" ]] && cp -v -aR target/"${MYSQL_FOLDER}" target/"${MYSQL_FOLDER_HOST}"
 
 (
- . bin/uncrosscompile.sh
+ . uncrosscompile.sh
  pushd target/"${MYSQL_FOLDER_HOST}"
  cmake .
  make comp_err
