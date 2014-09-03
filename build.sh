@@ -164,7 +164,7 @@ pushd target/"${PROFTPD_FOLDER}"
   --with-modules=mod_copy:mod_dnsbl:mod_exec:mod_ifsession:mod_load:mod_quotatab:mod_quotatab_file:mod_quotatab_sql:mod_ratio:mod_readme:mod_rewrite:mod_sftp:mod_sftp_sql:mod_shaper:mod_site_misc:mod_sql:mod_sql_mysql:mod_sql_sqlite:mod_sql_passwd:mod_tls:mod_unique_id \
   --with-libraries="${DEST}/lib" --with-openssl-cmdline="${DEST}/libexec/openssl" \
   install_user="$(id -un)" install_group="$(id -gn)" \
-  ac_cv_func_setpgrp_void=yes ac_cv_func_setgrent_void=yes LIBS="${LIBS:-} $(${CC} -print-file-name=libresolv.a)"
+  ac_cv_func_setpgrp_void=yes ac_cv_func_setgrent_void=yes
 pushd lib/libcap
 make CC=cc CFLAGS="" LDFLAGS="" _makenames
 popd
