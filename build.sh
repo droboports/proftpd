@@ -150,7 +150,6 @@ popd
 
 ### PROFTPD ###
 ## TODO: mod_geoip, mod_ldap, mod_snmp
-
 _build_proftpd() {
 local PROFTPD_VERSION="1.3.5"
 local PROFTPD_FOLDER="proftpd-${PROFTPD_VERSION}"
@@ -174,7 +173,6 @@ popd
 }
 
 ### BUILD ###
-
 _build() {
   _build_zlib
   _build_openssl
@@ -185,14 +183,16 @@ _build() {
 }
 
 _create_tgz() {
-  local appname="$(basename $(pwd))"
-  local appfile="${appname}.tgz"
+  local appname="$(basename ${PWD})"
+  local appfile="${PWD}/${appname}.tgz"
 
   if [[ -f "${appfile}" ]]; then
     rm -v "${appfile}"
   fi
 
-  tar --verbose --create --numeric-owner --owner=0 --group=0 --gzip --file "${appfile}" -C "${DEST}" .
+  pushd "${DEST}"
+  tar --verbose --create --numeric-owner --owner=0 --group=0 --gzip --file "${appfile}" *
+  popd
 }
 
 _package() {
