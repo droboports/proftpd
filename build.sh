@@ -21,7 +21,7 @@ exec 2> >(tee -a "${logfile}" >&2)
 
 ### environment variables ###
 . crosscompile.sh
-export NAME="openssh"
+export NAME="proftpd"
 export DEST="/mnt/DroboFS/Shares/DroboApps/${NAME}"
 export DEPS="/mnt/DroboFS/Shares/DroboApps/${NAME}deps"
 export CFLAGS="${CFLAGS:-} -Os -fPIC"
