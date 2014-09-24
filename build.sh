@@ -20,7 +20,7 @@ exec 1> >(tee -a "${logfile}")
 exec 2> >(tee -a "${logfile}" >&2)
 
 ### environment variables ###
-. crosscompile.sh
+source crosscompile.sh
 export NAME="proftpd"
 export DEST="/mnt/DroboFS/Shares/DroboApps/${NAME}"
 export DEPS="/mnt/DroboFS/Shares/DroboApps/${NAME}deps"
@@ -28,26 +28,26 @@ export CFLAGS="${CFLAGS:-} -Os -fPIC"
 export CXXFLAGS="${CXXFLAGS:-} ${CFLAGS}"
 export CPPFLAGS="-I${DEPS}/include"
 export LDFLAGS="${LDFLAGS:-} -Wl,-rpath,${DEST}/lib -L${DEST}/lib"
-alias make="make -j8  V=1 VERBOSE=1"
+alias make="make -j8 V=1 VERBOSE=1"
 
 # $1: file
 # $2: url
 # $3: folder
 _download_tgz() {
   [[ ! -f "download/${1}" ]] && wget -O "download/${1}" "${2}"
-  [[ -d "target/${3}" ]]   && rm -v -fr "target/${3}"
+  [[ -d "target/${3}" ]] && rm -v -fr "target/${3}"
   [[ ! -d "target/${3}" ]] && tar -zxvf "download/${1}" -C target
 }
 
 ### ZLIB ###
 _build_zlib() {
-local ZLIB_VERSION="1.2.8"
-local ZLIB_FOLDER="zlib-${ZLIB_VERSION}"
-local ZLIB_FILE="${ZLIB_FOLDER}.tar.gz"
-local ZLIB_URL="http://zlib.net/${ZLIB_FILE}"
+local VERSION="1.2.8"
+local FOLDER="zlib-${VERSION}"
+local FILE="${FOLDER}.tar.gz"
+local URL="http://zlib.net/${FILE}"
 
-_download_tgz "${ZLIB_FILE}" "${ZLIB_URL}" "${ZLIB_FOLDER}"
-pushd target/"${ZLIB_FOLDER}"
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+pushd target/"${FOLDER}"
 ./configure --prefix="${DEPS}" --libdir="${DEST}/lib"
 make
 make install
@@ -72,52 +72,50 @@ pushd target/"${OPENSSL_FOLDER}"
 sed -i -e "s/-O3//g" Makefile
 make -j1
 make install_sw
-mkdir -p "${DEST}/libexec"
-cp -v -a "${DEPS}/bin/openssl" "${DEST}/libexec/"
-cp -v -aR "${DEPS}/lib"/* "${DEST}/lib/"
-rm -v -fr "${DEPS}/lib"
-rm -v "${DEST}/lib"/*.a
-sed -i -e "s|^exec_prefix=.*|exec_prefix=${DEST}|g" "${DEST}/lib/pkgconfig/openssl.pc"
+mkdir -p "${DEST}"/libexec
+cp -avR "${DEPS}/bin/openssl" "${DEST}/libexec/"
+cp -avR "${DEPS}/lib"/* "${DEST}/lib/"
+rm -fvr "${DEPS}/lib"
+rm -fv "${DEST}/lib"/*.a
+sed -i -e "s|^exec_prefix=.*|exec_prefix=${DEST}|g" "${DEST}"/lib/pkgconfig/openssl.pc
 popd
 }
 
 ### SQLITE ###
 _build_sqlite() {
-local SQLITE_VERSION="3080600"
-local SQLITE_FOLDER="sqlite-autoconf-${SQLITE_VERSION}"
-local SQLITE_FILE="${SQLITE_FOLDER}.tar.gz"
-local SQLITE_URL="http://sqlite.org/2014/${SQLITE_FILE}"
+local VERSION="3080600"
+local FOLDER="sqlite-autoconf-${VERSION}"
+local FILE="${FOLDER}.tar.gz"
+local URL="http://sqlite.org/2014/${FILE}"
 
-_download_tgz "${SQLITE_FILE}" "${SQLITE_URL}" "${SQLITE_FOLDER}"
-pushd target/"${SQLITE_FOLDER}"
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+pushd target/"${FOLDER}"
 ./configure --host=arm-none-linux-gnueabi --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static
 make
 make install
 mkdir -p "${DEST}/libexec"
-cp -v -a "${DEPS}/bin/sqlite3" "${DEST}/libexec/"
+cp -av "${DEPS}/bin/sqlite3" "${DEST}/libexec/"
 popd
 }
 
 ### MYSQL-CONNECTOR ###
 _build_mysql() {
-MYSQL_VERSION="6.1.5"
-MYSQL_FOLDER="mysql-connector-c-${MYSQL_VERSION}-src"
-MYSQL_FILE="${MYSQL_FOLDER}.tar.gz"
-MYSQL_URL="http://cdn.mysql.com/Downloads/Connector-C/${MYSQL_FILE}"
-export MYSQL_FOLDER_HOST="${MYSQL_FOLDER}-host"
+local VERSION="6.1.5"
+local FOLDER="mysql-connector-c-${VERSION}-src"
+local FILE="${FOLDER}.tar.gz"
+local URL="http://cdn.mysql.com/Downloads/Connector-C/${FILE}"
+export FOLDER_HOST="${FOLDER}-host"
 
-_download_tgz "${MYSQL_FILE}" "${MYSQL_URL}" "${MYSQL_FOLDER}"
-[[ -d target/"${MYSQL_FOLDER_HOST}" ]] && rm -v -fr target/"${MYSQL_FOLDER_HOST}"
-[[ ! -d target/"${MYSQL_FOLDER_HOST}" ]] && cp -v -aR target/"${MYSQL_FOLDER}" target/"${MYSQL_FOLDER_HOST}"
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+[[ -d target/"${FOLDER_HOST}" ]] && rm -v -fr target/"${FOLDER_HOST}"
+[[ ! -d target/"${FOLDER_HOST}" ]] && cp -v -aR target/"${FOLDER}" target/"${FOLDER_HOST}"
 
-(
- . uncrosscompile.sh
- pushd target/"${MYSQL_FOLDER_HOST}"
- cmake .
- make comp_err
-)
+( source uncrosscompile.sh
+  pushd target/"${FOLDER_HOST}"
+  cmake .
+  make comp_err )
 
-pushd target/"${MYSQL_FOLDER}"
+pushd target/"${FOLDER}"
 cat > "cmake_toolchain_file.$ARCH" << EOF
 SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_SYSTEM_PROCESSOR ${ARCH})
@@ -151,13 +149,13 @@ popd
 ### PROFTPD ###
 ## TODO: mod_geoip, mod_ldap, mod_snmp
 _build_proftpd() {
-local PROFTPD_VERSION="1.3.5"
-local PROFTPD_FOLDER="proftpd-${PROFTPD_VERSION}"
-local PROFTPD_FILE="${PROFTPD_FOLDER}.tar.gz"
-local PROFTPD_URL="ftp://ftp.proftpd.org/distrib/source/${PROFTPD_FILE}"
+local VERSION="1.3.5"
+local FOLDER="proftpd-${VERSION}"
+local FILE="${FOLDER}.tar.gz"
+local URL="ftp://ftp.proftpd.org/distrib/source/${FILE}"
 
-_download_tgz "${PROFTPD_FILE}" "${PROFTPD_URL}" "${PROFTPD_FOLDER}"
-pushd target/"${PROFTPD_FOLDER}"
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+pushd target/"${FOLDER}"
 ./configure --host=arm-none-linux-gnueabi --prefix="${DEST}" --mandir="${DEST}/man" --disable-static \
   --disable-strip --enable-dso --enable-ctrls --enable-openssl \
   --with-modules=mod_copy:mod_dnsbl:mod_exec:mod_ifsession:mod_load:mod_quotatab:mod_quotatab_file:mod_quotatab_sql:mod_ratio:mod_readme:mod_rewrite:mod_sftp:mod_sftp_sql:mod_shaper:mod_site_misc:mod_sql:mod_sql_mysql:mod_sql_sqlite:mod_sql_passwd:mod_tls:mod_unique_id \
