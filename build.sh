@@ -7,6 +7,8 @@ set -o errexit
 set -o nounset
 # return error of last failed command in pipe
 set -o pipefail
+# expand aliases
+shopt -s expand_aliases
 # print trace
 set -o xtrace
 
