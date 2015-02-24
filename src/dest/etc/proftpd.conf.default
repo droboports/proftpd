@@ -15,24 +15,25 @@ AllowOverwrite          on
 
 RootLogin               off
 RequireValidShell       off
-SQLDefaultUID           99
-SQLDefaultGID           99
-SQLMinUserUID           999
-SQLMinUserGID           999
-AuthOrder               mod_sql.c mod_auth_unix.c
 DisplayLogin            welcome.msg
 DisplayChdir            .message
 AllowStoreRestart       on
 PidFile                 /tmp/DroboApps/proftpd/pid.txt
 SystemLog               /tmp/DroboApps/proftpd/log.txt
 ExtendedLog             /tmp/DroboApps/proftpd/auth.log AUTH
-#SQLLogFile              /tmp/DroboApps/proftpd/sql.log
 WtmpLog                 off
+
+AuthOrder               mod_sql.c mod_auth_unix.c
+#SQLLogFile              /tmp/DroboApps/proftpd/sql.log
+SQLDefaultUID           99
+SQLDefaultGID           99
+SQLMinUserUID           1000
+SQLMinUserGID           1000
 
 SQLBackend              sqlite3
 SQLEngine               on
 SQLAuthenticate         on
-SQLConnectInfo          /mnt/DroboFS/Shares/DroboApps/proftpd/var/auth.sqlite3
+SQLConnectInfo          /mnt/DroboFS/Shares/DroboApps/proftpd/etc/auth.sqlite3
 SQLUserInfo             users userid passwd uid gid homedir shell
 SQLGroupInfo            groups groupname gid members
 SQLUserWhereClause      "disabled != 1"
