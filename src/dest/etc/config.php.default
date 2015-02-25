@@ -1,4 +1,8 @@
 <?php
+if(!ini_get('date.timezone')){
+  date_default_timezone_set('GMT');
+}
+
 $cfg = array();
 
 $cfg['table_users'] = "users";
@@ -29,7 +33,7 @@ $cfg['field_gid'] = "gid";
 $cfg['field_members'] = "members";
 
 $cfg['default_uid'] = "";
-$cfg['default_homedir'] = "/srv/ftp";
+$cfg['default_homedir'] = "/mnt/DroboFS/Shares/Public";
 $cfg['min_passwd_length'] = "6";
 $cfg['max_userid_length'] = "20";
 $cfg['max_groupname_length'] = "20";

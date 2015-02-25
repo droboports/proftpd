@@ -153,7 +153,7 @@ local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
 sed -i -e "/unset ac_cv_func_dlopen/d" -e "/unset ac_cv_lib_dl_dlopen/d" configure
-QEMU_LD_PREFIX="${TOOLCHAIN}/${DROBO}/${HOST}/libc" ./configure --host="${HOST}" --prefix="${DEPS}" --bindir="${DEST}/libexec" --libdir="${DEST}/lib" --disable-all --disable-static --disable-cli --enable-cgi --enable-pdo --with-pic --with-config-file-path="${DEST}/etc" --with-mysql=shared,"${DEPS}" --with-mysqli=shared,"${DEPS}/bin/mysql_config" --with-pdo-mysql=shared,"${DEPS}/bin/mysql_config" --with-pdo-sqlite=shared,"${DEPS}" --with-sqlite3=shared,"${DEPS}" LIBS="-ldl" ac_cv_func_dlopen=yes ac_cv_lib_dl_dlopen=yes
+QEMU_LD_PREFIX="${TOOLCHAIN}/${DROBO}/${HOST}/libc" ./configure --host="${HOST}" --prefix="${DEPS}" --bindir="${DEST}/libexec" --libdir="${DEST}/lib" --disable-all --disable-static --disable-cli --enable-cgi --enable-pdo --enable-hash --with-pic --with-config-file-path="${DEST}/etc" --with-mysql=shared,"${DEPS}" --with-mysqli=shared,"${DEPS}/bin/mysql_config" --with-pdo-mysql=shared,"${DEPS}/bin/mysql_config" --with-pdo-sqlite=shared,"${DEPS}" --with-sqlite3=shared,"${DEPS}" LIBS="-ldl" ac_cv_func_dlopen=yes ac_cv_lib_dl_dlopen=yes
 make
 make install
 rm -vf "${DEST}/libexec/php" "${DEST}/libexec/php-config" "${DEST}/libexec/phpize"
