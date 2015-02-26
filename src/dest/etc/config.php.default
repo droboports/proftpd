@@ -34,6 +34,7 @@ $cfg['field_members'] = "members";
 
 $cfg['default_uid'] = "";
 $cfg['default_homedir'] = "/mnt/DroboFS/Shares/Public";
+$cfg['passwd_encryption'] = "pbkdf2";
 $cfg['min_passwd_length'] = "6";
 $cfg['max_userid_length'] = "20";
 $cfg['max_groupname_length'] = "20";
