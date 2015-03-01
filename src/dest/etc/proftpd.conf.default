@@ -27,8 +27,6 @@ AuthOrder               mod_sql.c mod_auth_unix.c
 #SQLLogFile              /tmp/DroboApps/proftpd/sql.log
 SQLDefaultUID           99
 SQLDefaultGID           99
-SQLMinUserUID           1000
-SQLMinUserGID           1000
 
 SQLBackend              sqlite3
 SQLEngine               on
