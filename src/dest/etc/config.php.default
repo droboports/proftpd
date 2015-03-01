@@ -1,0 +1,49 @@
+<?php
+if(!ini_get('date.timezone')){
+  date_default_timezone_set('GMT');
+}
+
+$cfg = array();
+
+$cfg['table_users'] = "users";
+$cfg['field_userid'] = "userid";
+$cfg['field_id'] = "id";
+$cfg['field_uid'] = "uid";
+$cfg['field_gid'] = "gid";
+$cfg['field_passwd'] = "passwd";
+$cfg['field_homedir'] = "homedir";
+$cfg['field_shell'] = "shell";
+$cfg['field_title'] = "title";
+$cfg['field_name'] = "name";
+$cfg['field_company'] = "company";
+$cfg['field_email'] = "email";
+$cfg['field_comment'] = "comment";
+$cfg['field_disabled'] = "disabled";
+$cfg['field_login_count'] = "login_count";
+$cfg['field_last_login'] = "last_login";
+$cfg['field_last_modified'] = "last_modified";
+$cfg['field_bytes_in_used'] = "bytes_in_used";
+$cfg['field_bytes_out_used'] = "bytes_out_used";
+$cfg['field_files_in_used'] = "files_in_used";
+$cfg['field_files_out_used'] = "files_out_used";
+
+$cfg['table_groups'] = "groups";
+$cfg['field_groupname'] = "groupname";
+$cfg['field_gid'] = "gid";
+$cfg['field_members'] = "members";
+
+$cfg['default_uid'] = "";
+$cfg['default_homedir'] = "/mnt/DroboFS/Shares/Public";
+$cfg['passwd_encryption'] = "pbkdf2";
+$cfg['min_passwd_length'] = "6";
+$cfg['max_userid_length'] = "20";
+$cfg['max_groupname_length'] = "20";
+$cfg['userid_regex'] = "/^([a-z][a-z0-9_\-]{0,20})$/i";
+$cfg['groupname_regex'] = "/^([a-z][a-z0-9_\-]{0,20})$/i";
+
+$cfg['userid_filter_separator'] = "";
+
+$cfg['db_type'] = "sqlite3";
+$cfg['db_path'] = "/mnt/DroboFS/Shares/DroboApps/proftpd/etc/";
+$cfg['db_name'] = "auth.sqlite3";
+?>

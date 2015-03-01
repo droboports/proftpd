@@ -5,6 +5,8 @@
 # import DroboApps framework functions
 . /etc/service.subr
 
+### app-specific section
+
 # DroboApp framework version
 framework_version="2.0"
 
@@ -18,24 +20,74 @@ pidfile="/tmp/DroboApps/${name}/pid.txt"
 logfile="/tmp/DroboApps/${name}/log.txt"
 statusfile="/tmp/DroboApps/${name}/status.txt"
 errorfile="/tmp/DroboApps/${name}/error.txt"
+pidweb="/tmp/DroboApps/${name}/web_server.pid"
 
 # app-specific variables
 prog_dir="$(dirname $(realpath ${0}))"
-conffile="${prog_dir}/etc/proftpd.conf"
-servercrt="${prog_dir}/etc/server.crt"
-serverkey="${prog_dir}/etc/server.key"
-authfile="${prog_dir}/var/auth.sqlite3"
 daemon="${prog_dir}/sbin/proftpd"
+conffile="${prog_dir}/etc/proftpd.conf"
+webserver="${prog_dir}/libexec/web_server"
+confweb="${prog_dir}/etc/web_server.conf"
+phpcgi="${prog_dir}/libexec/php-cgi"
+
+# _is_pid_running
+# $1: daemon
+# $2: pidfile
+# returns: 0 if pid is running, 1 if not running or if pidfile does not exist.
+_is_pid_running() {
+  /sbin/start-stop-daemon -K -t -x "${1}" -p "${2}" -q
+}
+
+# _is_running
+# returns: 0 if app is running, 1 if not running or pidfile does not exist.
+_is_running() {
+  if ! _is_pid_running "${webserver}" "${pidweb}"; then return 1; fi
+  if ! _is_pid_running "${daemon}" "${pidfile}"; then return 1; fi
+  return 0;
+}
+
+# _is_stopped
+# returns: 0 if app is stopped, 1 if running.
+_is_stopped() {
+  if _is_pid_running "${webserver}" "${pidweb}"; then return 1; fi
+  if _is_pid_running "${daemon}" "${pidfile}"; then return 1; fi
+  return 0;
+}
+
+start() {
+  set -u # exit on unset variable
+  set -e # exit on uncaught error code
+  set -x # enable script trace
+  "${daemon}" -c "${conffile}" -S 0.0.0.0
+  "${webserver}" "${confweb}" & echo $! > "${pidweb}"
+}
+
+# override /etc/service.subrc
+stop_service() {
+  if _is_stopped; then
+    echo ${name} is not running >&3
+    if [[ "${1:-}" == "-f" ]]; then
+      return 0
+    else
+      return 1
+    fi
+  fi
+  set +e  # disable exit on uncaught error code
+  /sbin/start-stop-daemon -K -x "${webserver}" -p "${pidweb}" -v
+  /sbin/start-stop-daemon -K -x "${daemon}" -p "${pidfile}" -v
+  set -e  # enable exit on uncaught error code
+}
+
+### common section
 
 # script hardening
 set -o errexit  # exit on uncaught error code
 set -o nounset  # exit on unset variable
-set -o pipefail # propagate last error code on pipe
 
 # ensure log folder exists
-grep -q ^tmpfs /proc/mounts || mount -t tmpfs tmpfs /tmp
+if ! grep -q ^tmpfs /proc/mounts; then mount -t tmpfs tmpfs /tmp; fi
 logfolder="$(dirname ${logfile})"
-[[ ! -d "${logfolder}" ]] && mkdir -p "${logfolder}"
+if [[ ! -d "${logfolder}" ]]; then mkdir -p "${logfolder}"; fi
 
 # redirect all output to logfile
 exec 3>&1 1>> "${logfile}" 2>&1
@@ -43,58 +95,31 @@ exec 3>&1 1>> "${logfile}" 2>&1
 # log current date, time, and invocation parameters
 echo $(date +"%Y-%m-%d %H-%M-%S"): ${0} ${@}
 
-# enable script tracing
-set -o xtrace
-
-_create_config() {
-  for src in "${prog_dir}/etc"/*.default; do
-    local dst="${prog_dir}/etc/$(basename ${src} .default)"
-    if [[ ! -f "${dst}" ]]; then
-      cp -v "${src}" "${dst}"
-    fi
-  done
-}
-
-_create_database() {
-  if [[ ! -f "${authfile}" ]]; then
-    "${prog_dir}/libexec/sqlite3" "${authfile}" < "${prog_dir}/www/tables-sqlite3.sql"
-    chmod a+rw "${authfile}"
-  fi
-}
-
-_create_cert() {
-  if [[ ! -f "${servercrt}" ]]; then
-    "${prog_dir}/libexec/openssl" req -new -x509 -keyout "${serverkey}" -out "${servercrt}" -days 3650 -nodes -subj '/C=US/ST=CA/L=Santa Clara/CN=drobo-5n.local'
-  fi
-}
-
-start() {
-  _create_config
-  _create_database
-  _create_cert
-  "${daemon}" -c "${conffile}"
-}
-
 _service_start() {
-  # disable error code and unset variable checks
-  set +e
-  set +u
-  # /etc/service.subr uses DROBOAPPS without setting it first
-  DROBOAPPS=""
-  # 
+  if _is_running; then
+    echo ${name} is already running >&3
+    return 1
+  fi
+  set +x # disable script trace
+  set +e # disable error code check
+  set +u # disable unset variable check
   start_service
-  set -u
-  set -e
 }
 
 _service_stop() {
-  /sbin/start-stop-daemon -K -x "${daemon}" -p "${pidfile}" -v || echo "${name} is not running" >&3
+  stop_service
+}
+
+_service_waitstop() {
+  stop_service -f
+  while ! _is_stopped; do
+    sleep 1
+  done
 }
 
 _service_restart() {
-  service_stop
-  sleep 3
-  service_start
+  _service_waitstop
+  _service_start
 }
 
 _service_status() {
@@ -102,12 +127,14 @@ _service_status() {
 }
 
 _service_help() {
-  echo "Usage: $0 [start|stop|restart|status]" >&3
-  set +e
+  echo "Usage: $0 [start|stop|waitstop|restart|status]" >&3
   exit 1
 }
 
+# enable script tracing
+set -o xtrace
+
 case "${1:-}" in
-  start|stop|restart|status) _service_${1} ;;
+  start|stop|waitstop|restart|status) _service_${1} ;;
   *) _service_help ;;
 esac
