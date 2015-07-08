@@ -1,3 +1,15 @@
+# $1: file
+# $2: url
+# $3: folder
+_download_zip() {
+  [[ ! -d "download" ]]      && mkdir -p "download"
+  [[ ! -d "target" ]]        && mkdir -p "target"
+  [[ ! -f "download/${1}" ]] && wget -O "download/${1}" "${2}"
+  [[   -d "target/${3}" ]]   && rm -v -fr "target/${3}"
+  [[ ! -d "target/${3}" ]]   && unzip -d "target" "download/${1}"
+  return 0
+}
+
 ### ZLIB ###
 _build_zlib() {
 local VERSION="1.2.8"
@@ -16,20 +28,20 @@ popd
 
 ### OPENSSL ###
 _build_openssl() {
-local OPENSSL_VERSION="1.0.2"
-local OPENSSL_FOLDER="openssl-${OPENSSL_VERSION}"
-local OPENSSL_FILE="${OPENSSL_FOLDER}.tar.gz"
-local OPENSSL_URL="http://www.openssl.org/source/${OPENSSL_FILE}"
+local VERSION="1.0.2c"
+local FOLDER="openssl-${VERSION}"
+local FILE="${FOLDER}.tar.gz"
+local URL="http://www.openssl.org/source/${FILE}"
 
-_download_tgz "${OPENSSL_FILE}" "${OPENSSL_URL}" "${OPENSSL_FOLDER}"
-pushd "target/${OPENSSL_FOLDER}"
-./Configure --prefix="${DEPS}" \
-  --openssldir="${DEST}/etc/ssl" \
-  --with-zlib-include="${DEPS}/include" \
-  --with-zlib-lib="${DEST}/lib" \
-  shared zlib-dynamic threads linux-armv4 no-asm -DL_ENDIAN ${CFLAGS} ${LDFLAGS}
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+cp -vf "src/${FOLDER}-parallel-build.patch" "target/${FOLDER}/"
+pushd "target/${FOLDER}"
+patch -p1 -i "${FOLDER}-parallel-build.patch"
+./Configure --prefix="${DEPS}" --openssldir="${DEST}/etc/ssl" \
+  zlib-dynamic --with-zlib-include="${DEPS}/include" --with-zlib-lib="${DEPS}/lib" \
+  shared threads linux-armv4 -DL_ENDIAN ${CFLAGS} ${LDFLAGS} -Wa,--noexecstack -Wl,-z,noexecstack
 sed -i -e "s/-O3//g" Makefile
-make -j1
+make
 make install_sw
 mkdir -p "${DEST}/libexec/"
 cp -vfa "${DEPS}/bin/openssl" "${DEST}/libexec/"
@@ -42,7 +54,7 @@ popd
 
 ### SQLITE ###
 _build_sqlite() {
-local VERSION="3080802"
+local VERSION="3081002"
 local FOLDER="sqlite-autoconf-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sqlite.org/$(date +%Y)/${FILE}"
@@ -113,7 +125,7 @@ popd
 
 ### PROFTPD ###
 _build_proftpd() {
-local VERSION="1.3.5"
+local VERSION="1.3.5a"
 local FOLDER="proftpd-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="ftp://ftp.proftpd.org/distrib/source/${FILE}"
@@ -145,7 +157,7 @@ popd
 
 ### PHP ###
 _build_php() {
-local VERSION="5.6.6"
+local VERSION="5.6.10"
 local FOLDER="php-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
@@ -176,12 +188,14 @@ popd
 
 ### PROFTPD-ADMIN ###
 _build_admin() {
-local BRANCH="drobo"
-local FOLDER="www"
-local URL="https://github.com/droboports/ProFTPd-Admin.git"
+local COMMIT="cf4525c88fd97541a29548a6a272270a3364bb93"
+local FOLDER="ProFTPd-Admin-${COMMIT}"
+local FILE="${FOLDER}.zip"
+local URL="https://github.com/droboports/ProFTPd-Admin/archive/${COMMIT}.zip"
 
-_download_git "${BRANCH}" "${FOLDER}" "${URL}"
-cp -vfaR "target/${FOLDER}" "${DEST}/"
+_download_zip "${FILE}" "${URL}" "${FOLDER}"
+mkdir -p "${DEST}/www"
+cp -vfaR "target/${FOLDER}/"* "${DEST}/www/"
 }
 
 ### BUILD ###
