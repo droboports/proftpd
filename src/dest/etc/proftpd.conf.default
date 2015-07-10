@@ -21,6 +21,7 @@ AllowStoreRestart       on
 PidFile                 /tmp/DroboApps/proftpd/pid.txt
 SystemLog               /tmp/DroboApps/proftpd/log.txt
 ExtendedLog             /tmp/DroboApps/proftpd/auth.log AUTH
+TransferLog             /tmp/DroboApps/proftpd/xferlog
 WtmpLog                 off
 
 AuthOrder               mod_sql.c mod_auth_unix.c

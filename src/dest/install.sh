@@ -32,3 +32,11 @@ if [ ! -f "${servercrt}" ] || [ ! -f "${serverkey}" ]; then
     -keyout "${serverkey}" -out "${servercrt}" -days 3650 -nodes \
     -subj '/C=US/ST=CA/L=Santa Clara/CN=drobo-5n.local'
 fi
+
+if [ -f "/var/log/xferlog" ]; then
+  mv "/var/log/xferlog"* "${tmp_dir}"
+fi
+
+if [ -f "${prog_dir}/etc/proftpd.conf" ] && ! grep -q "TransferLog" "${prog_dir}/etc/proftpd.conf"; then
+  echo "TransferLog ${tmp_dir}/xferlog" >> "${prog_dir}/etc/proftpd.conf"
+fi

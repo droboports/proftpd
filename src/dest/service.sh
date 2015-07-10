@@ -39,13 +39,15 @@ start() {
 }
 
 stop() {
-  /sbin/start-stop-daemon -K -x "${webserver}" -p "${pidweb}" -v
-  /sbin/start-stop-daemon -K -x "${daemon}" -p "${pidfile}" -v
+  start-stop-daemon -K -x "${webserver}" -p "${pidweb}" -v -o
+#  start-stop-daemon -K -x "${daemon}" -p "${pidfile}" -v
+  killall proftpd
 }
 
 force_stop() {
-  /sbin/start-stop-daemon -K -s 9 -x "${webserver}" -p "${pidweb}" -v
-  /sbin/start-stop-daemon -K -s 9 -x "${daemon}" -p "${pidfile}" -v
+  start-stop-daemon -K -s 9 -x "${webserver}" -p "${pidweb}" -v -o
+#  start-stop-daemon -K -s 9 -x "${daemon}" -p "${pidfile}" -v
+  killall -9 proftpd
 }
 
 # boilerplate
