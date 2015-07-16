@@ -50,7 +50,7 @@ local URL="http://sqlite.org/$(date +%Y)/${FILE}"
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
 ./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static
-make
+make -j1
 make install
 mkdir -p "${DEST}/libexec/"
 cp -vfa "${DEPS}/bin/sqlite3" "${DEST}/libexec/"
