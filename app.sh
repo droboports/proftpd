@@ -1,15 +1,3 @@
-# $1: file
-# $2: url
-# $3: folder
-_download_zip() {
-  [[ ! -d "download" ]]      && mkdir -p "download"
-  [[ ! -d "target" ]]        && mkdir -p "target"
-  [[ ! -f "download/${1}" ]] && wget -O "download/${1}" "${2}"
-  [[   -d "target/${3}" ]]   && rm -v -fr "target/${3}"
-  [[ ! -d "target/${3}" ]]   && unzip -d "target" "download/${1}"
-  return 0
-}
-
 ### ZLIB ###
 _build_zlib() {
 local VERSION="1.2.8"
@@ -28,7 +16,7 @@ popd
 
 ### OPENSSL ###
 _build_openssl() {
-local VERSION="1.0.2c"
+local VERSION="1.0.2d"
 local FOLDER="openssl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://www.openssl.org/source/${FILE}"
@@ -174,11 +162,12 @@ popd
 
 ### MONGOOSE ###
 _build_mongoose() {
-local BRANCH="master"
-local FOLDER="mongoose"
-local URL="https://github.com/cesanta/mongoose.git"
+local COMMIT="524aa2e58699491b5a0bca53d5fb3e4c33e05d8e"
+local FOLDER="mongoose-${COMMIT}"
+local FILE="${FOLDER}.zip"
+local URL="https://github.com/cesanta/mongoose/archive/${COMMIT}.zip"
 
-_download_git "${BRANCH}" "${FOLDER}" "${URL}"
+_download_zip "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}/examples/web_server"
 make
 mkdir -p "${DEST}/libexec"
