@@ -1,0 +1,8 @@
+<Anonymous ##0##>
+  UserAlias             ##1##  nobody
+  AuthAliasOnly         on
+  SQLEngine off
+  User nobody
+  Group nobody
+  MaxClients            3
+</Anonymous>

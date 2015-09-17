@@ -1,11 +1,10 @@
-<Anonymous /mnt/DroboFS/Shares/Public>
-  UserAlias             anonymous  nobody
-  UserAlias             ftp        nobody
+<Anonymous ##0##>
+  UserAlias             ##1##  nobody
   AuthAliasOnly         on
   SQLEngine off
   User nobody
   Group nobody
-  MaxClients		3
+  MaxClients            3
   <Directory *>
     <Limit WRITE>
       DenyAll

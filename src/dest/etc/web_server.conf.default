@@ -1,6 +1,0 @@
-listening_port 8021
-cgi_interpreter /mnt/DroboFS/Shares/DroboApps/proftpd/libexec/php-cgi
-cgi_pattern **.php
-document_root /mnt/DroboFS/Shares/DroboApps/proftpd/www
-auth_domain ProFTPd
-global_auth_file /mnt/DroboFS/Shares/DroboApps/proftpd/etc/htpasswd

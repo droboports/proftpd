@@ -1,0 +1,3 @@
+<p>This DroboApp deploys <?php echo $appname; ?> on your Drobo.</p>
+<p>The File Transfer Protocol (<a href="https://en.wikipedia.org/wiki/File_Transfer_Protocol" target="_new">FTP</a>) is a standard network protocol used to transfer computer files from one host to another host over the Internet.</p>
+<p>Professional FTP Daemon (<?php echo $appname; ?>) is among the most popular FTP servers today, and whose primary goal is to be a feature rich FTP server.</p>

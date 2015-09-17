@@ -19,7 +19,7 @@ _build_openssl() {
 local VERSION="1.0.2d"
 local FOLDER="openssl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="http://www.openssl.org/source/${FILE}"
+local URL="http://mirror.switch.ch/ftp/mirror/openssl/source/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 cp -vf "src/${FOLDER}-parallel-build.patch" "target/${FOLDER}/"
@@ -27,22 +27,26 @@ pushd "target/${FOLDER}"
 patch -p1 -i "${FOLDER}-parallel-build.patch"
 ./Configure --prefix="${DEPS}" --openssldir="${DEST}/etc/ssl" \
   zlib-dynamic --with-zlib-include="${DEPS}/include" --with-zlib-lib="${DEPS}/lib" \
-  shared threads linux-armv4 -DL_ENDIAN ${CFLAGS} ${LDFLAGS} -Wa,--noexecstack -Wl,-z,noexecstack
+  shared threads linux-armv4 -DL_ENDIAN ${CFLAGS} ${LDFLAGS} \
+  -Wa,--noexecstack -Wl,-z,noexecstack
 sed -i -e "s/-O3//g" Makefile
 make
 make install_sw
-mkdir -p "${DEST}/libexec/"
+mkdir -p "${DEST}/libexec"
 cp -vfa "${DEPS}/bin/openssl" "${DEST}/libexec/"
-cp -vfaR "${DEPS}/lib"/* "${DEST}/lib/"
-rm -vfr "${DEPS}/lib"
-rm -vf "${DEST}/lib/libcrypto.a" "${DEST}/lib/libssl.a"
-sed -i -e "s|^exec_prefix=.*|exec_prefix=${DEST}|g" "${DEST}/lib/pkgconfig/openssl.pc"
+cp -vfa "${DEPS}/lib/libssl.so"* "${DEST}/lib/"
+cp -vfa "${DEPS}/lib/libcrypto.so"* "${DEST}/lib/"
+cp -vfaR "${DEPS}/lib/engines" "${DEST}/lib/"
+cp -vfaR "${DEPS}/lib/pkgconfig" "${DEST}/lib/"
+rm -vf "${DEPS}/lib/libcrypto.a" "${DEPS}/lib/libssl.a"
+sed -e "s|^libdir=.*|libdir=${DEST}/lib|g" -i "${DEST}/lib/pkgconfig/libcrypto.pc"
+sed -e "s|^libdir=.*|libdir=${DEST}/lib|g" -i "${DEST}/lib/pkgconfig/libssl.pc"
 popd
 }
 
 ### SQLITE ###
 _build_sqlite() {
-local VERSION="3081002"
+local VERSION="3081101"
 local FOLDER="sqlite-autoconf-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sqlite.org/$(date +%Y)/${FILE}"
@@ -50,7 +54,7 @@ local URL="http://sqlite.org/$(date +%Y)/${FILE}"
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
 ./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static
-make -j1
+make
 make install
 mkdir -p "${DEST}/libexec/"
 cp -vfa "${DEPS}/bin/sqlite3" "${DEST}/libexec/"
@@ -143,38 +147,6 @@ rm -vf "${DEST}/etc/proftpd.conf"
 popd
 }
 
-### PHP ###
-_build_php() {
-local VERSION="5.6.10"
-local FOLDER="php-${VERSION}"
-local FILE="${FOLDER}.tar.gz"
-local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
-
-_download_tgz "${FILE}" "${URL}" "${FOLDER}"
-pushd "target/${FOLDER}"
-sed -i -e "/unset ac_cv_func_dlopen/d" -e "/unset ac_cv_lib_dl_dlopen/d" configure
-QEMU_LD_PREFIX="${TOOLCHAIN}/${DROBO}/${HOST}/libc" ./configure --host="${HOST}" --prefix="${DEPS}" --bindir="${DEST}/libexec" --libdir="${DEST}/lib" --disable-all --disable-static --disable-cli --enable-cgi --enable-hash --with-pic --with-config-file-path="${DEST}/etc" --with-mysql=shared,"${DEPS}" --with-sqlite3=shared,"${DEPS}" LIBS="-ldl" ac_cv_func_dlopen=yes ac_cv_lib_dl_dlopen=yes
-make
-make install
-rm -vf "${DEST}/libexec/php" "${DEST}/libexec/php-config" "${DEST}/libexec/phpize"
-popd
-}
-
-### MONGOOSE ###
-_build_mongoose() {
-local COMMIT="524aa2e58699491b5a0bca53d5fb3e4c33e05d8e"
-local FOLDER="mongoose-${COMMIT}"
-local FILE="${FOLDER}.zip"
-local URL="https://github.com/cesanta/mongoose/archive/${COMMIT}.zip"
-
-_download_zip "${FILE}" "${URL}" "${FOLDER}"
-pushd "target/${FOLDER}/examples/web_server"
-make
-mkdir -p "${DEST}/libexec"
-cp web_server "${DEST}/libexec/"
-popd
-}
-
 ### PROFTPD-ADMIN ###
 _build_admin() {
 local COMMIT="cf4525c88fd97541a29548a6a272270a3364bb93"
@@ -183,8 +155,8 @@ local FILE="${FOLDER}.zip"
 local URL="https://github.com/droboports/ProFTPd-Admin/archive/${COMMIT}.zip"
 
 _download_zip "${FILE}" "${URL}" "${FOLDER}"
-mkdir -p "${DEST}/www"
-cp -vfaR "target/${FOLDER}/"* "${DEST}/www/"
+mkdir -p "${DEST}/app"
+cp -vfaR "target/${FOLDER}/"* "${DEST}/app/"
 }
 
 ### BUILD ###
@@ -194,8 +166,6 @@ _build() {
   _build_sqlite
   _build_mysql
   _build_proftpd
-  _build_php
-  _build_mongoose
   _build_admin
   _package
 }

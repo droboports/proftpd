@@ -8,6 +8,7 @@ tmp_dir="/tmp/DroboApps/${name}"
 logfile="${tmp_dir}/install.log"
 servercrt="${prog_dir}/etc/server.crt"
 serverkey="${prog_dir}/etc/server.key"
+incron_dir="/etc/incron.d"
 
 # boilerplate
 if [ ! -d "${tmp_dir}" ]; then mkdir -p "${tmp_dir}"; fi
@@ -15,7 +16,6 @@ exec 3>&1 4>&2 1>> "${logfile}" 2>&1
 echo "$(date +"%Y-%m-%d %H-%M-%S"):" "${0}" "${@}"
 set -o errexit  # exit on uncaught error code
 set -o nounset  # exit on unset variable
-set -o pipefail # propagate last error code on pipe
 set -o xtrace   # enable script tracing
 
 # copy default configuration files
@@ -33,10 +33,6 @@ if [ ! -f "${servercrt}" ] || [ ! -f "${serverkey}" ]; then
     -subj '/C=US/ST=CA/L=Santa Clara/CN=drobo-5n.local'
 fi
 
-if [ -f "/var/log/xferlog" ]; then
-  mv "/var/log/xferlog"* "${tmp_dir}"
-fi
-
-if [ -f "${prog_dir}/etc/proftpd.conf" ] && ! grep -q "TransferLog" "${prog_dir}/etc/proftpd.conf"; then
-  echo "TransferLog ${tmp_dir}/xferlog" >> "${prog_dir}/etc/proftpd.conf"
+if [ -d "${incron_dir}" ] && [ ! -f "${incron_dir}/${name}" ]; then
+  cp -f "${prog_dir}/${name}.incron" "${incron_dir}/${name}"
 fi

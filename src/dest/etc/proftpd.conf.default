@@ -19,7 +19,7 @@ DisplayLogin            welcome.msg
 DisplayChdir            .message
 AllowStoreRestart       on
 PidFile                 /tmp/DroboApps/proftpd/pid.txt
-SystemLog               /tmp/DroboApps/proftpd/log.txt
+SystemLog               /tmp/DroboApps/proftpd/proftpd.log
 ExtendedLog             /tmp/DroboApps/proftpd/auth.log AUTH
 TransferLog             /tmp/DroboApps/proftpd/xferlog
 WtmpLog                 off
@@ -67,4 +67,4 @@ SQLNamedQuery           files-in-count UPDATE "files_in_used=files_in_used+1 WHE
 </IfModule>
 
 # Uncomment the next line to enable anonymous access to the Public share
-#Include /mnt/DroboFS/Shares/DroboApps/proftpd/etc/anonymous.conf
+Include /mnt/DroboFS/Shares/DroboApps/proftpd/etc/shares.conf

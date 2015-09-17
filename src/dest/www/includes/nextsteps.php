@@ -1,0 +1,1 @@
+<p>It is possible to create user accounts limited to FTP access only, using the administration interface of <?php echo $appname; ?>. To access the administration interface click the &quot;Go to App&quot; button above.</p>

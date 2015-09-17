@@ -1,4 +1,0 @@
-include_path="."
-error_log="/tmp/DroboApps/proftpd/log.txt"
-extension=mysql.so
-extension=sqlite3.so
