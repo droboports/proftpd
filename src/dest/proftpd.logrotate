@@ -42,3 +42,21 @@
   su root root
   copytruncate
 }                         
+
+/tmp/DroboApps/proftpd/access.log {
+  missingok
+  notifempty
+  size 50k
+  rotate 1
+  su root root
+  copytruncate
+}
+
+/tmp/DroboApps/proftpd/error.log {
+  missingok
+  notifempty
+  size 50k
+  rotate 1
+  su root root
+  copytruncate
+}
