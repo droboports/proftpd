@@ -9,7 +9,9 @@ $applogs = array("/tmp/DroboApps/".$app."/log.txt",
                  "/tmp/DroboApps/".$app."/proftpd.log",
                  "/tmp/DroboApps/".$app."/auth.log",
                  "/tmp/DroboApps/".$app."/xferlog",
-                 "/tmp/DroboApps/".$app."/tls.log");
+                 "/tmp/DroboApps/".$app."/tls.log",
+                 "/tmp/DroboApps/".$app."/access.log",
+                 "/tmp/DroboApps/".$app."/error.log");
 $appconf = "/mnt/DroboFS/Shares/DroboApps/".$app."/etc/".$app.".conf";
 $appautoconf = $appconf.".auto";
 $appshares = "/mnt/DroboFS/Shares/DroboApps/".$app."/etc/shares.conf";
