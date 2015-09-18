@@ -32,3 +32,6 @@ if [ -f "${prog_dir}/etc/proftpd.conf" ]; then
     echo "Include ${prog_dir}/etc/shares.conf" >> "${prog_dir}/etc/proftpd.conf"
   fi
 fi
+
+# Remove old web ui
+rm -fR "${prog_dir}/www"
