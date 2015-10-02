@@ -36,3 +36,6 @@ fi
 if [ -d "${incron_dir}" ] && [ ! -f "${incron_dir}/${name}" ]; then
   cp -f "${prog_dir}/${name}.incron" "${incron_dir}/${name}"
 fi
+
+# install apache 2.x
+/usr/bin/DroboApps.sh install_version apache 2
